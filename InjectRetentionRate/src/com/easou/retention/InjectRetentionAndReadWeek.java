@@ -16,8 +16,9 @@ import org.apache.hadoop.hbase.client.HTable;
 import org.apache.hadoop.hbase.util.Bytes;
 
 /**
- *	周阅读量、周留存�? 
+ *	周阅读量、周留存? 
  */
+
 public class InjectRetentionAndReadWeek {
 
     protected static Configuration hBaseConfiguration = null;
@@ -104,9 +105,9 @@ public class InjectRetentionAndReadWeek {
     					// gid he liu cun lv
     					key = lineArray[0];
     					value = lineArray[3];
-    					float retentNum = 0;
-    					retentNum = Float.parseFloat(value);
-    					if(retentNum <= 0 || retentNum > 1) {
+    					float retent = 0;
+    					retent = Float.parseFloat(value);
+    					if(retent <= 0 || retent > 1) {
     						continue;
     					}
     					++ retentNum;
@@ -114,9 +115,9 @@ public class InjectRetentionAndReadWeek {
     					// gid  he yue du liang
     					key = lineArray[0];
     					value = lineArray[1];
-    					int readerNum = 0;
-    					readerNum = Integer.parseInt(value);
-    					if(readerNum <= 0) {
+    					int read = 0;
+    					read = Integer.parseInt(value);
+    					if(read <= 0) {
     						continue;
     					}
     					++ readNum;
