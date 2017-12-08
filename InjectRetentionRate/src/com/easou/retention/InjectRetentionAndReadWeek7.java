@@ -190,6 +190,7 @@ public class InjectRetentionAndReadWeek7 {
 		System.out.println("hbase表名:" + tableName);
 		
 		// 获取 hbase? htable;
+		hTable = getHtable(tableName);
 		writeLog("inject hbase...", logFile);
 		inject(retentionPath);
 		writeLog("留存率写入数量：" + retentNum, logFile);
