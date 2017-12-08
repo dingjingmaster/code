@@ -122,7 +122,7 @@ public class InjectRetentionAndReadWeek7 {
     					continue;
     				}
     				
-    				if (retentF > 0 && retentF < 1) {
+    				if (retentF > 0 && retentF <= 1) {
         				addRow(hTable, key, "x", "rt_w7", retentTemp);
         				
         				++ retentNum;
