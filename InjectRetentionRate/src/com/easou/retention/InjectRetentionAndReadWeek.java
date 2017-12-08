@@ -27,6 +27,7 @@ public class InjectRetentionAndReadWeek {
     protected static List<Put> list = null;
     protected static int retentNum = 0;
     protected static int readNum = 0;
+    protected static String logFile = null;
     
     static {        
 	    hBaseConfiguration = HBaseConfiguration.create();
@@ -89,7 +90,7 @@ public class InjectRetentionAndReadWeek {
      *	path 尧都区的 
      * 
      */
-    static void inject(String path, String colum) {
+    static void inject(String path) {
     	
     	BufferedReader fR = null;
     	try {
@@ -98,31 +99,44 @@ public class InjectRetentionAndReadWeek {
     		while ((lineTemp = fR.readLine()) != null) {
     			String[] lineArray = lineTemp.split("\t");
     			String key;
-    			String value;
-    			// gid �? 留存�? 
+    			String retentTemp;
+    			float retentF;
+    			String readTemp;
+    			int readI;
+    			// gid 和 留存率 
     			try {
-    				if(lineArray.length == 4) {
-    					// gid he liu cun lv
-    					key = lineArray[0];
-    					value = lineArray[3];
-    					float retent = 0;
-    					retent = Float.parseFloat(value);
-    					if(retent <= 0 || retent > 1) {
-    						continue;
-    					}
-    					++ retentNum;
-    				} else {
-    					// gid  he yue du liang
-    					key = lineArray[0];
-    					value = lineArray[1];
-    					int read = 0;
-    					read = Integer.parseInt(value);
-    					if(read <= 0) {
-    						continue;
-    					}
+    				
+    				if(lineArray.length != 8) {
+    					writeLog(lineTemp + "\twrong length", logFile);
+    					
+    					continue;
+    				}
+    				
+    				key = lineArray[0];
+    				retentTemp = lineArray[5];
+    				readTemp = lineArray[7];
+    				
+    				retentF = Float.parseFloat(retentTemp);
+    				readI = Integer.parseInt(readTemp);
+    				
+    				if(retentF < 0 || retentF > 1 || readI < 0) {
+    					writeLog(lineTemp + "\twrong value", logFile);
+    					
+    					continue;
+    				}
+    				
+    				if (retentF > 0 && retentF < 1) {
+        				addRow(hTable, key, "x", "rt_w", retentTemp);
+        				
+        				++ retentNum;
+    				}
+    				
+    				if (readI > 0) {
+    					addRow(hTable, key, "x", "rn_w", readTemp);
+    					
     					++ readNum;
     				}
-					addRow(hTable, key, "x", colum, value);
+    				
 					if(list.size() > 4096) {
 						commitHbase();
 					}
@@ -170,19 +184,17 @@ public class InjectRetentionAndReadWeek {
 	public static void main(String[] args) throws IOException {
 		// TODO Auto-generated method stub
 		
-		if(args.length != 4) {
-			System.out.println("输入参数错误:\n请依次输�?:留存率结果�?�阅读量结果、日志文件�?�hbase表名");
+		if(args.length != 3) {
+			System.out.println("输入参数错误:\n请依次输入:留存率结果、日志文件、hbase表名");
 			
 			return;
 		}
 
 		String retentionPath = args[0];
-		String readPath = args[1];
-		String logFile = args[2];
-		String tableName = args[3];
+		logFile = args[1];
+		String tableName = args[2];
 		
-		System.out.println("留存率路�?:" + retentionPath);
-		System.out.println("阅读量路�?:" + readPath);
+		System.out.println("留存率路:" + retentionPath);
 		System.out.println("日志路径:" + logFile);
 		System.out.println("hbase表名:" + tableName);
 		
@@ -193,10 +205,9 @@ public class InjectRetentionAndReadWeek {
 	
 		// 获取 hbase �? htable;
 		hTable = getHtable(tableName); //-----
-		writeLog("�?始注�? hbase...", logFile);
-		inject(retentionPath, "rt_w");
+		writeLog("inject hbase...", logFile);
+		inject(retentionPath);
 		writeLog("留存率写入数量：" + retentNum, logFile);
-		inject(readPath, "rn_w");
 		writeLog("阅读量写入数量：" + readNum, logFile);
 		closeHbase();
 		writeLog("写入完成!!!", logFile);

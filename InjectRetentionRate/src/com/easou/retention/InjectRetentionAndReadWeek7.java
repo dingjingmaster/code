@@ -7,6 +7,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.util.LinkedList;
 import java.util.List;
+import java.lang.Integer;
 
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.hbase.client.Put;
@@ -14,17 +15,20 @@ import org.apache.hadoop.hbase.HBaseConfiguration;
 import org.apache.hadoop.hbase.client.HTable;
 import org.apache.hadoop.hbase.util.Bytes;
 
+/**
+ *	å‘¨é˜…è¯»é‡ã€å‘¨ç•™å­˜? 
+ */
 
-public class InjectRetentionAndReadDay {
+public class InjectRetentionAndReadWeek7 {
 
-	protected static Configuration hBaseConfiguration = null;
+    protected static Configuration hBaseConfiguration = null;
     protected static HTable hTable = null;
     protected static FileWriter fileWriter = null;
     protected static List<Put> list = null;
     protected static int retentNum = 0;
     protected static int readNum = 0;
     protected static String logFile = null;
-	    
+    
     static {        
 	    hBaseConfiguration = HBaseConfiguration.create();
 	    hBaseConfiguration.set("hbase.rootdir", "hdfs://10.26.22.186:9090/hbase");
@@ -32,7 +36,7 @@ public class InjectRetentionAndReadDay {
 	    hBaseConfiguration.set("hbase.zookeeper.property.clientPort", "2181");
 	    list = new LinkedList<Put>();
     }
-	    
+    
     static HTable getHtable(String tableName) {
 
     	try {
@@ -40,7 +44,7 @@ public class InjectRetentionAndReadDay {
     	} catch (IOException e) {
     		e.printStackTrace();
     		
-    		System.out.println("´íÎó");
+    		System.out.println("é”™è¯¯");
     		return null;
     	}
 
@@ -51,13 +55,13 @@ public class InjectRetentionAndReadDay {
         Put e = new Put(Bytes.toBytes(row));
         e.add(Bytes.toBytes(columnfamily), Bytes.toBytes(column), Bytes.toBytes(value));
         list.add(e);
-        //System.out.println("Ìí¼Ó!!!");
+        //System.out.println("æ·»åŠ !!!");
     }
-	    
+    
     static void commitHbase() {
     	
     	if (null == hTable) {
-    		System.out.println("htable ´íÎó!!!");
+    		System.out.println("htable é”™è¯¯!!!");
     		return;
     	}
     	try {
@@ -82,13 +86,12 @@ public class InjectRetentionAndReadDay {
 			}
     	}
     }
-	    
-    
     /**
-     *	path Ò¢¶¼ÇøµÄ 
+     *	path å°§éƒ½åŒºçš„ 
      * 
      */
     static void inject(String path) {
+    	
     	BufferedReader fR = null;
     	try {
     		String lineTemp;
@@ -98,42 +101,33 @@ public class InjectRetentionAndReadDay {
     			String key;
     			String retentTemp;
     			float retentF;
-    			String readTemp;
-    			int readI;
-    			// gid ºÍ Áô´æÂÊ 
+    			
+    			// gid å’Œ ç•™å­˜ç‡ 
     			try {
     				
-    				if(lineArray.length != 8) {
+    				if(lineArray.length != 4) {
     					writeLog(lineTemp + "\twrong length", logFile);
     					
     					continue;
     				}
     				
     				key = lineArray[0];
-    				retentTemp = lineArray[5];
-    				readTemp = lineArray[7];
+    				retentTemp = lineArray[1];
     				
     				retentF = Float.parseFloat(retentTemp);
-    				readI = Integer.parseInt(readTemp);
     				
-    				if(retentF < 0 || retentF > 1 || readI < 0) {
+    				if(retentF < 0 || retentF > 1) {
     					writeLog(lineTemp + "\twrong value", logFile);
     					
     					continue;
     				}
     				
     				if (retentF > 0 && retentF < 1) {
-        				addRow(hTable, key, "x", "rt_d", retentTemp);
+        				addRow(hTable, key, "x", "rt_w7", retentTemp);
         				
         				++ retentNum;
     				}
     				
-    				if (readI > 0) {
-    					addRow(hTable, key, "x", "rn_d", readTemp);
-    					
-    					++ readNum;
-    				}
-
 					if(list.size() > 4096) {
 						commitHbase();
 					}
@@ -182,7 +176,7 @@ public class InjectRetentionAndReadDay {
 		// TODO Auto-generated method stub
 		
 		if(args.length != 3) {
-			System.out.println("ÊäÈë²ÎÊı´íÎó:\nÇëÒÀ´ÎÊäÈë:Áô´æÂÊ½á¹û¡¢ÈÕÖ¾ÎÄ¼ş¡¢hbase±íÃû");
+			System.out.println("è¾“å…¥å‚æ•°é”™è¯¯:\nè¯·ä¾æ¬¡è¾“å…¥:ç•™å­˜ç‡ç»“æœã€æ—¥å¿—æ–‡ä»¶ã€hbaseè¡¨å");
 			
 			return;
 		}
@@ -191,20 +185,18 @@ public class InjectRetentionAndReadDay {
 		logFile = args[1];
 		String tableName = args[2];
 		
-		System.out.println("inject file: " + retentionPath);
-		System.out.println("log path: " + logFile);
-		System.out.println("hbase table name: " + tableName);
-	
-		// »ñÈ¡ hbase µÄ htable;
-		hTable = getHtable(tableName); //-----
-		writeLog("start inject...", logFile);
+		System.out.println("ç•™å­˜ç‡?:" + retentionPath);
+		System.out.println("æ—¥å¿—è·¯å¾„:" + logFile);
+		System.out.println("hbaseè¡¨å:" + tableName);
+		
+		// è·å– hbase? htable;
+		writeLog("inject hbase...", logFile);
 		inject(retentionPath);
-		writeLog("Áô´æÂÊĞ´ÈëÊıÁ¿£º" + retentNum, logFile);
-		writeLog("ÔÄ¶ÁÁ¿Ğ´ÈëÊıÁ¿£º" + readNum, logFile);
+		writeLog("ç•™å­˜ç‡å†™å…¥æ•°é‡ï¼š" + retentNum, logFile);
+		writeLog("é˜…è¯»é‡å†™å…¥æ•°é‡ï¼š" + readNum, logFile);
 		closeHbase();
-		writeLog("inject complete!!!", logFile);
+		writeLog("å†™å…¥å®Œæˆ!!!", logFile);
 		
 		System.out.println("ok");
 	}
-
 }
