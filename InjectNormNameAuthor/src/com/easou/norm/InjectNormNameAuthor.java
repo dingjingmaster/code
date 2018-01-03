@@ -94,14 +94,14 @@ public class InjectNormNameAuthor {
     			String normAuthor;
     			
     			try {	
-    				if(lineArray.length != 5) {
+    				if(lineArray.length != 3) {
     					writeLog(lineTemp + "\twrong length", logFile);
     					continue;
     				}
     				
     				gid = lineArray[0];
-    				normName = lineArray[2];
-    				normAuthor = lineArray[4];
+    				normName = lineArray[1];
+    				normAuthor = lineArray[2];
     				
     				if (!gid.equals("")) {
     					if (!normAuthor.equals("")) {
