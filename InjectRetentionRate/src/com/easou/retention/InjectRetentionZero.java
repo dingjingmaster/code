@@ -15,7 +15,7 @@ import org.apache.hadoop.hbase.client.HTable;
 import org.apache.hadoop.hbase.util.Bytes;
 
 
-public class InjectRetentionAndReadDay {
+public class InjectRetentionZero {
 
 	protected static Configuration hBaseConfiguration = null;
     protected static HTable hTable = null;
@@ -88,7 +88,7 @@ public class InjectRetentionAndReadDay {
      *	path 尧都区的 
      * 
      */
-    static void inject(String path) {
+    static void inject(String path, String field1, String field2) {
     	BufferedReader fR = null;
     	try {
     		String lineTemp;
@@ -102,35 +102,19 @@ public class InjectRetentionAndReadDay {
     			int readI;
     			// gid 和 留存率 
     			try {
-    				if(lineArray.length != 8) {
+    				if(lineArray.length != 1) {
     					writeLog(lineTemp + "\twrong length", logFile);
     					continue;
     				}
     				
     				key = lineArray[0];
-    				retentTemp = lineArray[5];
-    				readTemp = lineArray[7];
+    				retentTemp = "0";
+    				readTemp = "0";
     				
-    				retentF = Float.parseFloat(retentTemp);
-    				readI = Integer.parseInt(readTemp);
-    				
-    				if(retentF < 0 || retentF > 1 || readI < 0) {
-    					writeLog(lineTemp + "\twrong value", logFile);
-    					
-    					continue;
-    				}
-    				
-    				if (retentF > 0 && retentF <= 1) {
-        				addRow(hTable, key, "x", "rt_d", retentTemp);
-        				
-        				++ retentNum;
-    				}
-    				
-    				if (readI > 0) {
-    					addRow(hTable, key, "x", "rn_d", readTemp);
-    					
-    					++ readNum;
-    				}
+    				addRow(hTable, key, "x", field1, retentTemp);
+    				addRow(hTable, key, "x", field2, readTemp);
+    				++ retentNum;
+    				++ readNum;
 
 					if(list.size() > 4096) {
 						commitHbase();
@@ -179,8 +163,8 @@ public class InjectRetentionAndReadDay {
 	public static void main(String[] args) throws IOException {
 		// TODO Auto-generated method stub
 		
-		if(args.length != 3) {
-			System.out.println("输入参数错误:\n请依次输入:留存率结果、日志文件、hbase表名");
+		if(args.length != 5) {
+			System.out.println("输入参数错误:\n请依次输入:留存率结果、日志文件、hbase表名、字段1、字段2");
 			
 			return;
 		}
@@ -188,15 +172,31 @@ public class InjectRetentionAndReadDay {
 		String retentionPath = args[0];
 		logFile = args[1];
 		String tableName = args[2];
+		String field1 = args[3];
+		String field2 = args[4];
 		
 		System.out.println("inject file: " + retentionPath);
 		System.out.println("log path: " + logFile);
 		System.out.println("hbase table name: " + tableName);
-	
+		System.out.println("field1: " + field1);
+		System.out.println("field2: " + field2);
+		
+		
 		// 获取 hbase 的 htable;
 		hTable = getHtable(tableName); //-----
 		writeLog("start inject...", logFile);
-		inject(retentionPath);
+		
+		/* 检查字段是否合法 */
+		if((!field1.equals("rn_d") || !field2.equals("rt_d"))
+				&& (!field1.equals("rn_w") || !field2.equals("rt_w"))
+				&& (!field1.equals("rn_w7") || !field2.equals("rt_w7"))) {
+			System.out.println("输入hbase字段出错(或顺序出错)");
+			writeLog("输入hbase字段出错(或顺序出错)", logFile);
+			return;
+			
+		}
+		
+		inject(retentionPath, field1, field2);
 		writeLog("留存率写入数量：" + retentNum, logFile);
 		writeLog("阅读量写入数量：" + readNum, logFile);
 		closeHbase();
