@@ -97,9 +97,7 @@ public class InjectRetentionZero {
     			String[] lineArray = lineTemp.split("\t");
     			String key;
     			String retentTemp;
-    			float retentF;
     			String readTemp;
-    			int readI;
     			// gid ºÍ Áô´æÂÊ 
     			try {
     				if(lineArray.length != 1) {
