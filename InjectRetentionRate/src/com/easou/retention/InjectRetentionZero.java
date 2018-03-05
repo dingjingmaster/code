@@ -27,9 +27,11 @@ public class InjectRetentionZero {
 	    
     static {        
 	    hBaseConfiguration = HBaseConfiguration.create();
-	    hBaseConfiguration.set("hbase.rootdir", "hdfs://10.26.22.186:9090/hbase");
-	    hBaseConfiguration.set("hbase.zookeeper.quorum", "moses.datanode1,moses.datanode2,moses.datanode3,moses.datanode4,moses.namenode");
+	    hBaseConfiguration.set("hbase.zookeeper.quorum", "moses.namenode01,moses.datanode10,moses.datanode11,moses.datanode12,moses.datanode13");
 	    hBaseConfiguration.set("hbase.zookeeper.property.clientPort", "2181");
+	    //hBaseConfiguration.set("hbase.rootdir", "hdfs://10.26.22.186:9090/hbase");
+	    //hBaseConfiguration.set("hbase.zookeeper.quorum", "moses.datanode1,moses.datanode2,moses.datanode3,moses.datanode4,moses.namenode");
+	    //hBaseConfiguration.set("hbase.zookeeper.property.clientPort", "2181");
 	    list = new LinkedList<Put>();
     }
 	    
@@ -191,7 +193,6 @@ public class InjectRetentionZero {
 			System.out.println("输入hbase字段出错(或顺序出错)");
 			writeLog("输入hbase字段出错(或顺序出错)", logFile);
 			return;
-			
 		}
 		
 		inject(retentionPath, field1, field2);
