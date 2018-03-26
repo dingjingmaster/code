@@ -31,8 +31,7 @@ public class InjectRetentionAndReadWeek {
     
     static {        
 	    hBaseConfiguration = HBaseConfiguration.create();
-	    hBaseConfiguration.set("hbase.rootdir", "hdfs://10.26.22.186:9090/hbase");
-	    hBaseConfiguration.set("hbase.zookeeper.quorum", "moses.datanode1,moses.datanode2,moses.datanode3,moses.datanode4,moses.namenode");
+	    hBaseConfiguration.set("hbase.zookeeper.quorum", "moses.namenode01,moses.datanode10,moses.datanode11,moses.datanode12,moses.datanode13");
 	    hBaseConfiguration.set("hbase.zookeeper.property.clientPort", "2181");
 	    list = new LinkedList<Put>();
     }
@@ -55,7 +54,6 @@ public class InjectRetentionAndReadWeek {
         Put e = new Put(Bytes.toBytes(row));
         e.add(Bytes.toBytes(columnfamily), Bytes.toBytes(column), Bytes.toBytes(value));
         list.add(e);
-        //System.out.println("添加!!!");
     }
     
     static void commitHbase() {
@@ -90,8 +88,7 @@ public class InjectRetentionAndReadWeek {
      *	path 尧都区的 
      * 
      */
-    static void inject(String path) {
-    	
+    static void injectRetent(String path) {
     	BufferedReader fR = null;
     	try {
     		String lineTemp;
@@ -101,43 +98,72 @@ public class InjectRetentionAndReadWeek {
     			String key;
     			String retentTemp;
     			float retentF;
+    			// gid 和 留存率 
+    			try {
+    				
+    				if(lineArray.length != 8) {
+    					writeLog("rt_w: " + lineTemp + "\twrong length", logFile);
+    					continue;
+    				}
+    				key = lineArray[0];
+    				retentTemp = lineArray[5];
+    				retentF = Float.parseFloat(retentTemp);
+    				if (retentF > 0 && retentF <= 1) {
+        				addRow(hTable, key, "x", "rt_w", retentTemp);
+        				++ retentNum;
+    				}
+					if(list.size() > 4096) {
+						commitHbase();
+					}
+				} catch (Exception e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				} finally {
+					commitHbase();
+				}
+    		}
+    		commitHbase();
+    	} catch (IOException e) {
+    		e.printStackTrace();
+    	} finally {
+    		if (fR != null) {
+    			try {
+					fR.close();
+				} catch (IOException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+    		}
+    	}
+    }
+    
+    static void injectReadNum(String path) {
+    	
+    	BufferedReader fR = null;
+    	try {
+    		String lineTemp;
+    		fR = new BufferedReader(new FileReader(new File(path)));
+    		while ((lineTemp = fR.readLine()) != null) {
+    			String[] lineArray = lineTemp.split("\t");
+    			String key;
     			String readTemp;
     			int readI;
     			// gid 和 留存率 
     			try {
     				
     				if(lineArray.length != 8) {
-    					writeLog(lineTemp + "\twrong length", logFile);
+    					writeLog("rn_w: " + lineTemp + "\twrong length", logFile);
     					
     					continue;
     				}
-    				
     				key = lineArray[0];
-    				retentTemp = lineArray[5];
-    				readTemp = lineArray[7];
-    				
-    				retentF = Float.parseFloat(retentTemp);
+    				readTemp = lineArray[1];
     				readI = Integer.parseInt(readTemp);
-    				
-    				if(retentF < 0 || retentF > 1 || readI < 0) {
-    					writeLog(lineTemp + "\twrong value", logFile);
-    					
-    					continue;
-    				}
-    				
-    				if (retentF > 0 && retentF <= 1) {
-        				addRow(hTable, key, "x", "rt_w", retentTemp);
-        				
-        				++ retentNum;
-    				}
-    				
     				if (readI > 0) {
     					addRow(hTable, key, "x", "rn_w", readTemp);
-    					
     					++ readNum;
     				}
-    				
-					if(list.size() > 4096) {
+					if(list.size() > 8192) {
 						commitHbase();
 					}
 				} catch (Exception e) {
@@ -184,17 +210,18 @@ public class InjectRetentionAndReadWeek {
 	public static void main(String[] args) throws IOException {
 		// TODO Auto-generated method stub
 		
-		if(args.length != 3) {
-			System.out.println("输入参数错误:\n请依次输入:留存率结果、日志文件、hbase表名");
-			
+		if(args.length != 4) {
+			System.out.println("输入参数错误:\n请依次输入:留存率结果、周阅读量结果、日志文件、hbase表名");
 			return;
 		}
 
 		String retentionPath = args[0];
-		logFile = args[1];
-		String tableName = args[2];
+		String readNumPath = args[1];
+		logFile = args[2];
+		String tableName = args[3];
 		
 		System.out.println("留存率路:" + retentionPath);
+		System.out.println("周阅读量:" + readNumPath);
 		System.out.println("日志路径:" + logFile);
 		System.out.println("hbase表名:" + tableName);
 		
@@ -206,12 +233,12 @@ public class InjectRetentionAndReadWeek {
 		// 获取 hbase �? htable;
 		hTable = getHtable(tableName); //-----
 		writeLog("inject hbase...", logFile);
-		inject(retentionPath);
+		injectRetent(retentionPath);
+		injectReadNum(retentionPath);
 		writeLog("留存率写入数量：" + retentNum, logFile);
 		writeLog("阅读量写入数量：" + readNum, logFile);
 		closeHbase();
 		writeLog("写入完成!!!", logFile);
-		
 		System.out.println("ok");
 	}
 }
