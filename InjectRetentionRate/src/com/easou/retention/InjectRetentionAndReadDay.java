@@ -156,7 +156,7 @@ public class InjectRetentionAndReadDay {
     				}
     				
     				key = lineArray[0];
-    				readTemp = lineArray[7];
+    				readTemp = lineArray[1];
     				readI = Integer.parseInt(readTemp);
     				if (readI > 0) {
     					addRow(hTable, key, "x", "rn_d", readTemp);
@@ -222,7 +222,7 @@ public class InjectRetentionAndReadDay {
 		String tableName = args[3];
 		
 		System.out.println("rt_d file: " + retentionPath);
-		System.out.println("rt_d file: " + readNumPath);
+		System.out.println("rn_d file: " + readNumPath);
 		System.out.println("log path: " + logFile);
 		System.out.println("hbase table name: " + tableName);
 	

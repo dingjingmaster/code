@@ -151,7 +151,7 @@ public class InjectRetentionAndReadWeek {
     			// gid 和 留存率 
     			try {
     				
-    				if(lineArray.length != 8) {
+    				if(lineArray.length != 2) {
     					writeLog("rn_w: " + lineTemp + "\twrong length", logFile);
     					
     					continue;
@@ -234,7 +234,7 @@ public class InjectRetentionAndReadWeek {
 		hTable = getHtable(tableName); //-----
 		writeLog("inject hbase...", logFile);
 		injectRetent(retentionPath);
-		injectReadNum(retentionPath);
+		injectReadNum(readNumPath);
 		writeLog("留存率写入数量：" + retentNum, logFile);
 		writeLog("阅读量写入数量：" + readNum, logFile);
 		closeHbase();
