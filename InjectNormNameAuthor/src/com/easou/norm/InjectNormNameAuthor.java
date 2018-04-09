@@ -15,7 +15,6 @@ import org.apache.hadoop.hbase.client.HTable;
 import org.apache.hadoop.hbase.util.Bytes;
 
 public class InjectNormNameAuthor {
-
 	protected static Configuration hBaseConfiguration = null;
     protected static HTable hTable = null;
     protected static FileWriter fileWriter = null;
@@ -25,27 +24,27 @@ public class InjectNormNameAuthor {
 	    
     static {        
 	    hBaseConfiguration = HBaseConfiguration.create();
-	    hBaseConfiguration.set("hbase.rootdir", "hdfs://10.26.22.186:9090/hbase");
-	    hBaseConfiguration.set("hbase.zookeeper.quorum", "moses.datanode1,moses.datanode2,moses.datanode3,moses.datanode4,moses.namenode");
+	    hBaseConfiguration.set("hbase.zookeeper.quorum", "moses.namenode01,moses.datanode10,moses.datanode11,moses.datanode12,moses.datanode13");
 	    hBaseConfiguration.set("hbase.zookeeper.property.clientPort", "2181");
 	    list = new LinkedList<Put>();
     }
 	    
-    static HTable getHtable(String tableName) {
+    @SuppressWarnings("deprecation")
+	static HTable getHtable(String tableName) {
 
     	try {
     		hTable = new HTable(hBaseConfiguration, tableName);
     	} catch (IOException e) {
     		e.printStackTrace();
-    		
-    		System.out.println("����");
+    		System.out.println("错误!!!");
     		return null;
     	}
 
     	return hTable;
     }
 
-    static void addRow(HTable htable, String row, String columnfamily, String column, String value) throws Exception {
+    @SuppressWarnings("deprecation")
+	static void addRow(HTable htable, String row, String columnfamily, String column, String value) throws Exception {
         Put e = new Put(Bytes.toBytes(row));
         e.add(Bytes.toBytes(columnfamily), Bytes.toBytes(column), Bytes.toBytes(value));
         list.add(e);
@@ -92,9 +91,9 @@ public class InjectNormNameAuthor {
     			String gid;
     			String normName;
     			String normAuthor;
-    			
+    			String normSeries;    			
     			try {	
-    				if(lineArray.length != 3) {
+    				if(lineArray.length != 4) {
     					writeLog(lineTemp + "\twrong length", logFile);
     					continue;
     				}
@@ -102,6 +101,7 @@ public class InjectNormNameAuthor {
     				gid = lineArray[0];
     				normName = lineArray[1];
     				normAuthor = lineArray[2];
+    				normSeries = lineArray[3];
     				
     				if (!gid.equals("")) {
     					if (!normAuthor.equals("")) {
@@ -110,10 +110,12 @@ public class InjectNormNameAuthor {
     					if (!normName.equals("")){
         					addRow(hTable, gid, "x", "norm_name", normName);
     					}
+    					if (!normSeries.equals("")){
+        					addRow(hTable, gid, "x", "norm_series", normSeries);
+    					}
     					++itemNum;
     				}
-
-					if(list.size() > 4096) {
+					if(list.size() >= 8192) {
 						commitHbase();
 					}
 				} catch (Exception e) {

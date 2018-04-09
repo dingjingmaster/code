@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <classpath>
 	<classpathentry kind="src" path="src"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
 	<classpathentry kind="lib" path="E:/GitHub/code/jars/activation-1.1.jar"/>
 	<classpathentry kind="lib" path="E:/GitHub/code/jars/aopalliance-1.0.jar"/>
 	<classpathentry kind="lib" path="E:/GitHub/code/jars/apacheds-i18n-2.0.0-M15.jar"/>
@@ -142,6 +143,5 @@
 	<classpathentry kind="lib" path="E:/GitHub/code/jars/xmlenc-0.52.jar"/>
 	<classpathentry kind="lib" path="E:/GitHub/code/jars/xz-1.0.jar"/>
 	<classpathentry kind="lib" path="E:/GitHub/code/jars/zookeeper-3.4.6.jar"/>
-	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
