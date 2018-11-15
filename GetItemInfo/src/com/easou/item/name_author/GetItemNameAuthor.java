@@ -9,6 +9,8 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.hbase.client.Result;
@@ -36,7 +38,10 @@ public class GetItemNameAuthor {
     
     public static void write_file(FileWriter write, String line) {
     	try {
-			write.write(line);
+    		String[] arr = line.split("\t");
+    		if (arr.length == 5) {
+				write.write(line);
+			}
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			list.add("error" + e.getMessage());
@@ -73,18 +78,22 @@ public class GetItemNameAuthor {
 		    	for (KeyValue kv : res.list()) {
 		    		if ("name".equals(Bytes.toString(kv.getQualifier()))) {
 		    			name = Bytes.toString(kv.getValue());
+		    			name = replaceBlank(name);
 		    		} else if ("norm_name".equals(Bytes.toString(kv.getQualifier()))) {
 		    			normName = Bytes.toString(kv.getValue());
+		    			normName = replaceBlank(normName);
 		    		} else if ("author".equals(Bytes.toString(kv.getQualifier()))) {
 		    			author = Bytes.toString(kv.getValue());
+		    			author = replaceBlank(author);
 		    		} else if ("norm_author".equals(Bytes.toString(kv.getQualifier()))) {
 		    			normAuthor = Bytes.toString(kv.getValue());
+		    			normAuthor = replaceBlank(normAuthor);
 		    		}
 		    	}
 
 		    	if (gid.startsWith("i_")) {
-					write_file(fw, gid + "\t" + name + "\t" + normName + "\t" + author + "\t" + normAuthor + "\n");
-					++num;
+					write_file(fw, gid.trim() + "\t" + name.trim() + "\t" + normName.trim() + "\t" + author.trim() + "\t" + normAuthor.trim() + "\n");
+					++ num;
 				}
 	    	}
 		}catch (IOException e) {
@@ -95,7 +104,17 @@ public class GetItemNameAuthor {
 			scanner.close();
 		}
     }
-	
+
+	public static String replaceBlank(String str) {
+		String dest = "";
+		if (str!=null) {
+			Pattern p = Pattern.compile("\\s*|\t|\r|\n");
+			Matcher m = p.matcher(str);
+			dest = m.replaceAll("");
+		}
+		return dest;
+	}
+
     public static void main (String[] args) {
     	
     	if(args.length != 2) {
