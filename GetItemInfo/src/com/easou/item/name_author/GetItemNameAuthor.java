@@ -81,10 +81,11 @@ public class GetItemNameAuthor {
 		    			normAuthor = Bytes.toString(kv.getValue());
 		    		}
 		    	}
-		    	
-	    		//System.out.print(gid + "\t" + name + "\t" + normName + "\t" + author + "\t" + normAuthor + "\n");
-	    		write_file(fw, gid + "\t" + name + "\t" + normName + "\t" + author + "\t" + normAuthor + "\n");
-	    		++num;
+
+		    	if (gid.startsWith("i_")) {
+					write_file(fw, gid + "\t" + name + "\t" + normName + "\t" + author + "\t" + normAuthor + "\n");
+					++num;
+				}
 	    	}
 		}catch (IOException e) {
 			list.add("error:" + e.getMessage());
@@ -97,14 +98,15 @@ public class GetItemNameAuthor {
 	
     public static void main (String[] args) {
     	
-    	if(args.length != 1) {
+    	if(args.length != 2) {
     		System.out.println("please input tablename and log file");
+    		System.exit(-1);
     	}
 
     	String tableName = args[0];
     	String fileName = args[1];
-    	//String tableName = "item_info";
-    	//String fileName = "./item_name_author.txt";
+//    	String tableName = "item_info";
+//    	String fileName = "./item_name_author.txt";
     	
     	try {
 			scan(tableName, fileName);
@@ -116,7 +118,5 @@ public class GetItemNameAuthor {
     	for(String i : list) {
     		System.out.println("error: " + i);
     	}
-    	
-    	return;
     }
 }
