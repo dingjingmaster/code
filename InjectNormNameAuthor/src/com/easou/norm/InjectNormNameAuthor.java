@@ -103,16 +103,22 @@ public class InjectNormNameAuthor {
     				normAuthor = lineArray[2];
     				normSeries = lineArray[3];
     				
-    				if (!gid.equals("")) {
+    				if ((!gid.equals("")) && (gid.startsWith("i_"))) {
     					if (!normAuthor.equals("")) {
     						addRow(hTable, gid, "x", "norm_author", normAuthor);
-    					}
+    					} else {
+    						continue;
+						}
     					if (!normName.equals("")){
         					addRow(hTable, gid, "x", "norm_name", normName);
-    					}
+    					} else {
+    						continue;
+						}
     					if (!normSeries.equals("")){
         					addRow(hTable, gid, "x", "norm_series", normSeries);
-    					}
+    					} else {
+    						continue;
+						}
     					++itemNum;
     				}
 					if(list.size() >= 8192) {
@@ -165,6 +171,7 @@ public class InjectNormNameAuthor {
 			System.out.println("please input injectFile、logPath、hbaseTable");
 			return;
 		}
+		// dDAU 
 
 		String normResult = args[0];
 		logFile = args[1];
