@@ -29,8 +29,6 @@ public class InjectRetentionAndReadWeek7 {
     
     static {        
 	    hBaseConfiguration = HBaseConfiguration.create();
-	    hBaseConfiguration.set("hbase.zookeeper.quorum", "moses.namenode01,moses.datanode10,moses.datanode11,moses.datanode12,moses.datanode13");
-	    hBaseConfiguration.set("hbase.zookeeper.property.clientPort", "2181");
 	    list = new LinkedList<Put>();
     }
     
@@ -172,7 +170,7 @@ public class InjectRetentionAndReadWeek7 {
 	public static void main(String[] args) throws IOException {
 		// TODO Auto-generated method stub
 		
-		if(args.length != 3) {
+		if(args.length != 5) {
 			System.out.println("输入参数错误:\n请依次输入:留存率结果、日志文件、hbase表名");
 			
 			return;
@@ -181,11 +179,16 @@ public class InjectRetentionAndReadWeek7 {
 		String retentionPath = args[0];
 		logFile = args[1];
 		String tableName = args[2];
+		String zookeeper = args[3];
+		String zookeeperClient = args[4];
 		
 		System.out.println("留存率?:" + retentionPath);
 		System.out.println("日志路径:" + logFile);
 		System.out.println("hbase表名:" + tableName);
-		
+
+		hBaseConfiguration.set("hbase.zookeeper.quorum", zookeeper);
+		hBaseConfiguration.set("hbase.zookeeper.property.clientPort", zookeeperClient);
+
 		// 获取 hbase? htable;
 		hTable = getHtable(tableName);
 		writeLog("inject hbase...", logFile);

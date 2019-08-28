@@ -27,8 +27,6 @@ public class InjectRetentionAndReadDay {
 	    
     static {
 	    hBaseConfiguration = HBaseConfiguration.create();
-	    hBaseConfiguration.set("hbase.zookeeper.quorum", "moses.namenode01,moses.datanode10,moses.datanode11,moses.datanode12,moses.datanode13");
-	    hBaseConfiguration.set("hbase.zookeeper.property.clientPort", "2181");
 	    list = new LinkedList<Put>();
     }
 	    
@@ -39,7 +37,7 @@ public class InjectRetentionAndReadDay {
     	} catch (IOException e) {
     		e.printStackTrace();
     		
-    		System.out.println("´íÎó");
+    		System.out.println("");
     		return null;
     	}
 
@@ -50,13 +48,13 @@ public class InjectRetentionAndReadDay {
         Put e = new Put(Bytes.toBytes(row));
         e.add(Bytes.toBytes(columnfamily), Bytes.toBytes(column), Bytes.toBytes(value));
         list.add(e);
-        //System.out.println("Ìí¼Ó!!!");
+        //System.out.println("ï¿½ï¿½ï¿½!!!");
     }
 	    
     static void commitHbase() {
     	
     	if (null == hTable) {
-    		System.out.println("htable ´íÎó!!!");
+    		System.out.println("");
     		return;
     	}
     	try {
@@ -83,7 +81,7 @@ public class InjectRetentionAndReadDay {
     }
     
     /**
-     *	path Ò¢¶¼ÇøµÄ 
+     *	path Ò¢ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ 
      * 
      */
     static void injectRetent(String path) {
@@ -96,7 +94,7 @@ public class InjectRetentionAndReadDay {
     			String key;
     			String retentTemp;
     			float retentF;
-    			// gid ºÍ Áô´æÂÊ 
+    			// gid
     			try {
     				if(lineArray.length != 8) {
     					writeLog("inject retent:" + lineTemp + "\twrong length", logFile);
@@ -148,7 +146,7 @@ public class InjectRetentionAndReadDay {
     			String key;
     			String readTemp;
     			int readI;
-    			// gid ºÍ ÔÄ¶ÁÁ¿ 
+    			// gid ï¿½ï¿½ ï¿½Ä¶ï¿½ï¿½ï¿½ 
     			try {
     				if(lineArray.length != 2) {
     					writeLog("inject num: " + lineTemp + "\twrong length", logFile);
@@ -205,14 +203,11 @@ public class InjectRetentionAndReadDay {
 			e.printStackTrace();
 		}
     }
-    
 
 	public static void main(String[] args) throws IOException {
 		// TODO Auto-generated method stub
-		
-		if(args.length != 4) {
-			System.out.println("ÊäÈë²ÎÊı´íÎó:\nÇëÒÀ´ÎÊäÈë:Áô´æÂÊ½á¹û¡¢ÔÄ¶ÁÁ¿½á¹û¡¢ÈÕÖ¾ÎÄ¼ş¡¢hbase±íÃû");
-			
+		if(args.length != 6) {
+			System.out.println("");
 			return;
 		}
 
@@ -220,19 +215,24 @@ public class InjectRetentionAndReadDay {
 		String readNumPath = args[1];
 		logFile = args[2];
 		String tableName = args[3];
+		String zookeeper = args[4];
+		String zookeeperClient = args[5];
 		
 		System.out.println("rt_d file: " + retentionPath);
 		System.out.println("rn_d file: " + readNumPath);
 		System.out.println("log path: " + logFile);
 		System.out.println("hbase table name: " + tableName);
-	
-		// »ñÈ¡ hbase µÄ htable;
+
+		hBaseConfiguration.set("hbase.zookeeper.quorum", zookeeper);
+		hBaseConfiguration.set("hbase.zookeeper.property.clientPort", zookeeperClient);
+
+		//
 		hTable = getHtable(tableName); //-----
 		writeLog("start inject...", logFile);
 		injectRetent(retentionPath);
 		injectReadNum(readNumPath);
-		writeLog("Áô´æÂÊĞ´ÈëÊıÁ¿£º" + retentNum, logFile);
-		writeLog("ÔÄ¶ÁÁ¿Ğ´ÈëÊıÁ¿£º" + readNum, logFile);
+		writeLog("" + retentNum, logFile);
+		writeLog("" + readNum, logFile);
 		closeHbase();
 		writeLog("inject complete!!!", logFile);
 		System.out.println("ok");

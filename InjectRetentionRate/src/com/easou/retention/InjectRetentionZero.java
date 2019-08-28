@@ -27,8 +27,6 @@ public class InjectRetentionZero {
 	    
     static {        
 	    hBaseConfiguration = HBaseConfiguration.create();
-	    hBaseConfiguration.set("hbase.zookeeper.quorum", "moses.namenode01,moses.datanode10,moses.datanode11,moses.datanode12,moses.datanode13");
-	    hBaseConfiguration.set("hbase.zookeeper.property.clientPort", "2181");
 	    list = new LinkedList<Put>();
     }
 	    
@@ -39,7 +37,7 @@ public class InjectRetentionZero {
     	} catch (IOException e) {
     		e.printStackTrace();
     		
-    		System.out.println("错误");
+    		System.out.println("锟斤拷锟斤拷");
     		return null;
     	}
 
@@ -55,7 +53,7 @@ public class InjectRetentionZero {
     static void commitHbase() {
     	
     	if (null == hTable) {
-    		System.out.println("htable 错误!!!");
+    		System.out.println("");
     		return;
     	}
     	try {
@@ -83,7 +81,7 @@ public class InjectRetentionZero {
 	    
     
     /**
-     *	path 尧都区的 
+     *	path 尧锟斤拷锟斤拷锟斤拷 
      * 
      */
     static void inject(String path, String field1, String field2) {
@@ -96,7 +94,7 @@ public class InjectRetentionZero {
     			String key;
     			String retentTemp;
     			String readTemp;
-    			// gid 和 留存率 
+    			// gid 锟斤拷 锟斤拷锟斤拷锟斤拷 
     			try {
     				if(lineArray.length != 1) {
     					writeLog(lineTemp + "\twrong length", logFile);
@@ -159,8 +157,8 @@ public class InjectRetentionZero {
 	public static void main(String[] args) throws IOException {
 		// TODO Auto-generated method stub
 		
-		if(args.length != 5) {
-			System.out.println("输入参数错误:\n请依次输入:留存率结果、日志文件、hbase表名、字段1、字段2");
+		if(args.length != 7) {
+			System.out.println("鍙傛暟杈撳叆閿欒");
 			
 			return;
 		}
@@ -170,31 +168,35 @@ public class InjectRetentionZero {
 		String tableName = args[2];
 		String field1 = args[3];
 		String field2 = args[4];
+		String zookeeper = args[5];
+		String zookeeperClient = args[6];
 		
 		System.out.println("inject file: " + retentionPath);
 		System.out.println("log path: " + logFile);
 		System.out.println("hbase table name: " + tableName);
 		System.out.println("field1: " + field1);
 		System.out.println("field2: " + field2);
+
+		hBaseConfiguration.set("hbase.zookeeper.quorum", zookeeper);
+		hBaseConfiguration.set("hbase.zookeeper.property.clientPort", zookeeperClient);
 		
-		
-		// 获取 hbase 的 htable;
+		//
 		hTable = getHtable(tableName); //-----
 		writeLog("start inject...", logFile);
 		
-		/* 检查字段是否合法 */
+
 		if((!field1.equals("rn_d") || !field2.equals("rt_d"))
 				&& (!field1.equals("rn_w") || !field2.equals("rt_w"))
 				&& (!field1.equals("rn_w7") || !field2.equals("rt_w7"))
 				&& (!field1.equals("bn_d") || !field2.equals("bt_d"))) {
-			System.out.println("输入hbase字段出错(或顺序出错)");
-			writeLog("输入hbase字段出错(或顺序出错)", logFile);
+			System.out.println("");
+			writeLog("", logFile);
 			return;
 		}
 		
 		inject(retentionPath, field1, field2);
-		writeLog("留存率写入数量：" + retentNum, logFile);
-		writeLog("阅读量/购买量写入数量：" + readNum, logFile);
+		writeLog("" + retentNum, logFile);
+		writeLog("" + readNum, logFile);
 		closeHbase();
 		writeLog("inject complete!!!", logFile);
 		

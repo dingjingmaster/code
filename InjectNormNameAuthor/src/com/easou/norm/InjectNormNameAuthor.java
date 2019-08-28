@@ -24,8 +24,6 @@ public class InjectNormNameAuthor {
 	    
     static {        
 	    hBaseConfiguration = HBaseConfiguration.create();
-	    hBaseConfiguration.set("hbase.zookeeper.quorum", "moses.namenode01,moses.datanode10,moses.datanode11,moses.datanode12,moses.datanode13");
-	    hBaseConfiguration.set("hbase.zookeeper.property.clientPort", "2181");
 	    list = new LinkedList<Put>();
     }
 	    
@@ -166,8 +164,7 @@ public class InjectNormNameAuthor {
     
 	public static void main(String[] args) throws IOException {
 		// TODO Auto-generated method stub
-		
-		if(args.length != 3) {
+		if(args.length != 5) {
 			System.out.println("please input injectFile、logPath、hbaseTable");
 			return;
 		}
@@ -176,11 +173,17 @@ public class InjectNormNameAuthor {
 		String normResult = args[0];
 		logFile = args[1];
 		String tableName = args[2];
+		String zookeeper = args[3];
+		String zookeeperClient = args[4];
 		
 		System.out.println("inject file: " + normResult);
 		System.out.println("log path: " + logFile);
 		System.out.println("hbase table name: " + tableName);
-	
+
+
+		hBaseConfiguration.set("hbase.zookeeper.quorum", zookeeper);
+		hBaseConfiguration.set("hbase.zookeeper.property.clientPort", zookeeperClient);
+
 		hTable = getHtable(tableName); //-----
 		writeLog("start inject...", logFile);
 		inject(normResult);

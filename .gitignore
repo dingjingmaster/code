@@ -1,4 +1,7 @@
+classes/
+.idea/
 *.txt
 out
 bin
 jar
+*.iml
